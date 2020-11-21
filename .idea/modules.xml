@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/aopapply.iml" filepath="$PROJECT_DIR$/.idea/aopapply.iml" />
+      <module fileurl="file://$PROJECT_DIR$/apply-aspectj/apply-aspectj.iml" filepath="$PROJECT_DIR$/apply-aspectj/apply-aspectj.iml" />
+      <module fileurl="file://$PROJECT_DIR$/apply-classrelation/apply-classrelation.iml" filepath="$PROJECT_DIR$/apply-classrelation/apply-classrelation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/apply-common/apply-common.iml" filepath="$PROJECT_DIR$/apply-common/apply-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/apply-proxypattern/apply-proxypattern.iml" filepath="$PROJECT_DIR$/apply-proxypattern/apply-proxypattern.iml" />
+    </modules>
+  </component>
+</project>

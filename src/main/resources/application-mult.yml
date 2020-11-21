@@ -1,0 +1,18 @@
+#数据源配置
+spring:
+  datasource:
+    druid:
+      master:
+        jdbc-url: jdbc:mysql://localhost:6039/dbmaser?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
+        username: root
+        password: 123456
+        driver-class-name: com:mysql:jdbc:Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+      slave1:
+        jdbc-url: jdbc:mysql://localhost:6039/dbslave?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
+        username: root
+        password: 123456
+        driver-class-name: com:mysql:jdbc:Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+
+
