@@ -2,12 +2,9 @@ package com.magic.liuzm.datasource.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.collect.Maps;
-import com.magic.liuzm.datasource.DynamicDataSourceRouter;
-import com.magic.liuzm.datasource.annotation.DynamicDataSource;
 import com.magic.liuzm.datasource.enums.DataSourceEnum;
 import com.magic.liuzm.datasource.enums.WriteReadEnum;
 import com.zaxxer.hikari.HikariDataSource;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -18,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

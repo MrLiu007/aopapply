@@ -1,6 +1,6 @@
 package com.magic.liuzm.datasource.aop;
 
-import com.magic.liuzm.datasource.DynamicDataSourceContext;
+import com.magic.liuzm.datasource.config.DynamicDataSourceContext;
 import com.magic.liuzm.datasource.annotation.DynamicDataSource;
 import com.magic.liuzm.utils.AopUtil;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -35,8 +35,9 @@ public class DynamicDataSourceAop {
             // 执行原方法
             return point.proceed();
         }
-        //  业务执行前设置数据源
-        DynamicDataSourceContext.setDataSourceType(dataSource.dataSource().getCode() + dataSource.writeRead().name());
+        // 业务执行前设置数据源
+        StringBuffer stringBuffer = new StringBuffer(dataSource.dataSource().name()).append("_").append(dataSource.writeRead().name());
+        DynamicDataSourceContext.setDataSourceType(stringBuffer.toString());
         try {
             // 执行原方法
             return point.proceed();

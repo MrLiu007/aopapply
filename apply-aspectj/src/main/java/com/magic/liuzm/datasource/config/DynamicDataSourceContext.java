@@ -1,4 +1,4 @@
-package com.magic.liuzm.datasource;
+package com.magic.liuzm.datasource.config;
 
 /**
  * @author zemin.liu

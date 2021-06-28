@@ -1,4 +1,4 @@
-package com.magic.liuzm.datasource;
+package com.magic.liuzm.datasource.config;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import javax.sql.DataSource;

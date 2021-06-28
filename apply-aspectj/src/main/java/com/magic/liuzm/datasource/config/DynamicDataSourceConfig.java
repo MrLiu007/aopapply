@@ -1,14 +1,10 @@
 package com.magic.liuzm.datasource.config;
 
 import com.google.common.collect.Maps;
-import com.magic.liuzm.datasource.DynamicDataSourceRouter;
-import com.magic.liuzm.datasource.annotation.DynamicDataSource;
 import com.magic.liuzm.datasource.enums.DataSourceEnum;
 import com.magic.liuzm.datasource.enums.JdbcConfigEnum;
 import com.magic.liuzm.datasource.enums.WriteReadEnum;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
@@ -19,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.util.CollectionUtils;
-
 import javax.sql.DataSource;
 import java.util.Map;
 import java.util.Properties;
@@ -50,8 +45,10 @@ public class DynamicDataSourceConfig{
 
         // 可选择的数据源列表
         Map<Object, Object> targetDataSources = targetDataSources(bindResult.get());
-        // 这里设置druid-master为默认数据源
-        DataSource defaultTargetSource = (DataSource) targetDataSources.get(DataSourceEnum.DRUID.name() + WriteReadEnum.MASTER.name());
+        // DRUID_MASTER
+        StringBuffer stringBuffer = new StringBuffer(DataSourceEnum.DRUID.name()).append("_").append(WriteReadEnum.MASTER.name());
+        // 默认数据源
+        DataSource defaultTargetSource = (DataSource) targetDataSources.get(stringBuffer.toString());
 
         return new DynamicDataSourceRouter(defaultTargetSource, targetDataSources);
     }
@@ -107,7 +104,8 @@ public class DynamicDataSourceConfig{
                             .password(jdbcDO.getPassWord())
                             .type((Class<DataSource>) Class.forName(jdbcDO.getType())).build();
 
-                    targetDataSources.put(sourceType + writeReadType,dataSource);
+                    StringBuffer stringBuffer = new StringBuffer(sourceType).append("_").append(writeReadType);
+                    targetDataSources.put(stringBuffer.toString(),dataSource);
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e.getLocalizedMessage());
                 }
