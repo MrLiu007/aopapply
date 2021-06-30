@@ -15,12 +15,12 @@ public enum WriteReadEnum {
     /**
      * master：写+读操作
      */
-    SECOND_MASTER("master","主2库"),
+    SECOND_MASTER("master2","主2库"),
 
     /**
      * slave：读操作
      */
-    SLAVE("slave","从1库"),
+    SLAVE("slave","从库"),
 
     /**
      * slave：读操作
