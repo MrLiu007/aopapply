@@ -13,6 +13,11 @@ public enum WriteReadEnum {
     MASTER("master","主库"),
 
     /**
+     * master：写+读操作
+     */
+    SECOND_MASTER("master","主2库"),
+
+    /**
      * slave：读操作
      */
     SLAVE("slave","从1库"),
@@ -20,7 +25,7 @@ public enum WriteReadEnum {
     /**
      * slave：读操作
      */
-    SLAVE2("slave2","从2库");
+    SECOND_SLAVE("slave2","从2库");
 
     private String code;
 
