@@ -1,116 +1,132 @@
 package com.magic.liuzm.datasource.config;
 
+import com.alibaba.druid.pool.DruidAbstractDataSource;
 import com.google.common.collect.Maps;
-import com.magic.liuzm.datasource.enums.DataSourceEnum;
-import com.magic.liuzm.datasource.enums.JdbcConfigEnum;
-import com.magic.liuzm.datasource.enums.WriteReadEnum;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.bind.BindResult;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
-import org.springframework.util.CollectionUtils;
+import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * @author zemin.liu
- * @date 2020/6/8 11:31
- * @description 数据源信息配置方式1
- *
- * 属性动态加载
+ * @date 2021/6/28 11:31
+ * @description 数据源信息配置方式-属性动态加载
  */
-@Configuration
+@Component
 public class DynamicDataSourceConfig{
 
-    @Autowired
-    private Environment environment;
+    @Autowired(required = false)
+    private DruidConfig druidConfig;
+
+    @Autowired(required = false)
+    private HikariConfig hikariConfig;
+
 
     /**
-     * DynamicDataSource也为DataSource子类，这里用 @Primary进行标注，采用此实现类。
+     * 数据源路由器
      */
     @Bean
     @Primary
-    public DynamicDataSourceRouter dataSource() {
-        // springboot 2.0替换
-        Iterable<ConfigurationPropertySource> sources = ConfigurationPropertySources.get(environment);
-        BindResult<Properties> bindResult = new Binder(sources).bind("spring.datasource", Properties.class);
-
+    @ConditionalOnProperty(prefix = "spring.datasource.druid",name = "type", havingValue = "com.alibaba.druid.pool.DruidDataSource")
+    public DynamicDataSourceRouter druidDataSourceRouter() throws Exception{
         // 可选择的数据源列表
-        Map<Object, Object> targetDataSources = targetDataSources(bindResult.get());
-        // DRUID_MASTER
-        StringBuffer stringBuffer = new StringBuffer(DataSourceEnum.DRUID.name()).append("_").append(WriteReadEnum.MASTER.name());
-        // 默认数据源
-        DataSource defaultTargetSource = (DataSource) targetDataSources.get(stringBuffer.toString());
+        Map<Object, Object> targetDataSources = Maps.newHashMap();
 
-        return new DynamicDataSourceRouter(defaultTargetSource, targetDataSources);
+        JdbcConfig master = druidConfig.getMaster();
+        DataSource masterDataSource = DataSourceBuilder.create()
+                .url(master.getUrl())
+                .username(master.getUsername())
+                .password(master.getPassword())
+                .type((Class<DataSource>) Class.forName(druidConfig.getType())).build();
+        // 复制配置信息
+        bindDruidDataSourceConfig((DruidAbstractDataSource) masterDataSource,true);
+
+        JdbcConfig slave = druidConfig.getSlave();
+        if(slave != null && slave.checking()){
+            DataSource slaveDataSource = DataSourceBuilder.create()
+                    .url(slave.getUrl())
+                    .username(slave.getUsername())
+                    .password(slave.getPassword())
+                    .type((Class<DataSource>) Class.forName(druidConfig.getType())).build();
+            // 复制配置信息
+            bindDruidDataSourceConfig((DruidAbstractDataSource) slaveDataSource,false);
+
+            targetDataSources.put(((DruidAbstractDataSource) slaveDataSource).getName(), slaveDataSource);
+        }
+
+        return new DynamicDataSourceRouter(masterDataSource, targetDataSources);
     }
 
     /**
-     * 获得可选择的数据源列表
+     * 数据源路由器
      */
-    public Map<Object, Object> targetDataSources(Properties resolver) {
-        Map<String, Map<String, JdbcPropertiesDO>> datasourceConfig = Maps.newHashMap();
-        // 进行分类
-        Set<Map.Entry<Object,Object>> set = resolver.entrySet();
-        set.forEach(item ->{
-            String key = (String) item.getKey();
-            String value = (String) item.getValue();
-            // 区分数据源
-            String sourceType = key.substring(0,key.indexOf(".") - 1);
-            if(!DataSourceEnum.checkType(sourceType)){
-                return;
-            }
-            // 主从数据
-            Map<String,JdbcPropertiesDO> valueMap = datasourceConfig.get(sourceType);
-            if(CollectionUtils.isEmpty(valueMap)){
-                valueMap = Maps.newHashMap();
-            }
-            // 区分主从数据
-            String writeReadType = key.substring(0, key.indexOf(".",key.indexOf(".") + 1 ));
-            JdbcPropertiesDO jdbcDO = valueMap.get(writeReadType);
-            if(jdbcDO == null){
-                jdbcDO = new JdbcPropertiesDO();
-            }
-            // 匹配不同配置参数
-            valueMap.put(writeReadType, JdbcConfigEnum.bindTypeData(key,value,jdbcDO));
-
-            datasourceConfig.put(sourceType,valueMap);
-        });
-
-        // 保存各种数据源
+    @Bean
+    @Primary
+    @ConditionalOnProperty(prefix = "spring.datasource.hikari",name = "type", havingValue = "com.zaxxer.hikari.HikariDataSource")
+    public DynamicDataSourceRouter hikariDataSourceRouter() throws Exception{
+        // 可选择的数据源列表
         Map<Object, Object> targetDataSources = Maps.newHashMap();
-        // 将每类数据源创建为datasource对象
-        Set<Map.Entry<String,Map<String, JdbcPropertiesDO>>> dataSourceSet = datasourceConfig.entrySet();
-        dataSourceSet.forEach(item ->{
-            String sourceType = item.getKey();
-            Map<String, JdbcPropertiesDO> value = item.getValue();
-            Set<Map.Entry<String,JdbcPropertiesDO>> jdbcSet = value.entrySet();
-            jdbcSet.forEach(entry ->{
-                try {
-                    String writeReadType = entry.getKey();
-                    JdbcPropertiesDO jdbcDO = entry.getValue();
-                    DataSource dataSource = DataSourceBuilder.create()
-                            .driverClassName(jdbcDO.getDriverClassName())
-                            .url(jdbcDO.getJdbcUrl())
-                            .username(jdbcDO.getUserName())
-                            .password(jdbcDO.getPassWord())
-                            .type((Class<DataSource>) Class.forName(jdbcDO.getType())).build();
 
-                    StringBuffer stringBuffer = new StringBuffer(sourceType).append("_").append(writeReadType);
-                    targetDataSources.put(stringBuffer.toString(),dataSource);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e.getLocalizedMessage());
-                }
-            });
-        });
-        return targetDataSources;
+        JdbcConfig master = hikariConfig.getMaster();
+        DataSource masterDataSource = DataSourceBuilder.create()
+                .url(master.getUrl())
+                .username(master.getUsername())
+                .password(master.getPassword())
+                .type((Class<DataSource>) Class.forName(hikariConfig.getType())).build();
+        // 复制配置信息
+        bindHikariDataSourceConfig((HikariDataSource) masterDataSource,true);
+
+        JdbcConfig slave = hikariConfig.getSlave();
+        if(slave != null && slave.checking()){
+            DataSource slaveDataSource = DataSourceBuilder.create()
+                    .url(slave.getUrl())
+                    .username(slave.getUsername())
+                    .password(slave.getPassword())
+                    .type((Class<DataSource>) Class.forName(hikariConfig.getType())).build();
+            // 复制配置信息
+            bindHikariDataSourceConfig((HikariDataSource) slaveDataSource,false);
+
+            targetDataSources.put(((HikariDataSource) slaveDataSource).getPoolName(), slaveDataSource);
+        }
+
+        return new DynamicDataSourceRouter(masterDataSource, targetDataSources);
+    }
+
+    /**
+     * 绑定druid配置
+     */
+    private void bindDruidDataSourceConfig(DruidAbstractDataSource dataSource, boolean isDefault) throws Exception{
+        // TODO 这种写死方式不利于扩展
+        dataSource.setInitialSize(Integer.parseInt(druidConfig.getInitialSize()));
+        dataSource.setMaxActive(Integer.parseInt(druidConfig.getMaxActive()));
+        dataSource.setMinIdle(Integer.parseInt(druidConfig.getMinIdle()));
+        dataSource.setFilters(druidConfig.getFilters());
+        dataSource.setTestOnBorrow(druidConfig.getTestOnBorrow());
+
+        // 设置名称
+        dataSource.setName(isDefault ? DynamicDataSourceConstant.DEFAULT_DRUID_DATASOURCE
+                : DynamicDataSourceConstant.SECOND_DRUID_DATASOURCE);
+    }
+
+    /**
+     * 绑定hikari配置
+     */
+    private void bindHikariDataSourceConfig(HikariDataSource dataSource, boolean isDefault) throws Exception{
+        // TODO 这种写死方式不利于扩展
+        dataSource.setMaximumPoolSize(Integer.parseInt(hikariConfig.getMaximumPoolSize()));
+        dataSource.setMinimumIdle(Integer.parseInt(hikariConfig.getMinimumIdle()));
+        dataSource.setIdleTimeout(Integer.parseInt(hikariConfig.getIdleTimeout()));
+        dataSource.setMaxLifetime(Long.parseLong(hikariConfig.getMaxLifetime()));
+        dataSource.setConnectionTimeout(Long.parseLong(hikariConfig.getConnectionTimeout()));
+        dataSource.setConnectionTestQuery(hikariConfig.getConnectionTestQuery());
+
+        // 设置名称
+        dataSource.setPoolName(isDefault ? DynamicDataSourceConstant.DEFAULT_HIKARI_DATASOURCE
+                : DynamicDataSourceConstant.SECOND_HIKARI_DATASOURCE);
     }
 }

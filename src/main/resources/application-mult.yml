@@ -2,17 +2,31 @@
 spring:
   datasource:
     druid:
+      initial-size: 3
+      max-active: 10
+      min-idle: 2
+      filters: stat
+      test-on-borrow: true
+      type: com.alibaba.druid.pool.DruidDataSource
       master:
-        jdbc-url: jdbc:mysql://localhost:6039/dbmaser?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
+        url: jdbc:mysql://localhost:6039/dbmaser?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
         username: root
         password: 123456
-        driver-class-name: com:mysql:jdbc:Driver
-        type: com.alibaba.druid.pool.DruidDataSource
-      slave1:
-        jdbc-url: jdbc:mysql://localhost:6039/dbslave?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
+      slave:
+        url: jdbc:mysql://localhost:6039/dbslave?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
         username: root
         password: 123456
-        driver-class-name: com:mysql:jdbc:Driver
-        type: com.alibaba.druid.pool.DruidDataSource
+#    hikari:
+#      maximum-pool-size: 20
+#      minimum-idle: 10
+#      idle-timeout: 500000
+#      max-lifetime: 540000
+#      connection-timeout: 60000
+#      connection-test-query: SELECT 1
+#      type: com.zaxxer.hikari.HikariDataSource
+#      master:
+#        url: jdbc:mysql://localhost:6039/dbmaser?serverTimezone=UTC&useUnicode=true@characterEncoding=utf-8
+#        username: root
+#        password: 123456
 
 

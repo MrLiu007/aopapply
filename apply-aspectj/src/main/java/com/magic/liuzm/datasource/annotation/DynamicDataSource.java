@@ -1,12 +1,13 @@
 package com.magic.liuzm.datasource.annotation;
 
 import com.magic.liuzm.datasource.enums.DataSourceEnum;
+import com.magic.liuzm.datasource.enums.RdbmsTypeEnum;
 import com.magic.liuzm.datasource.enums.WriteReadEnum;
 import java.lang.annotation.*;
 
 /**
  * @author zemin.liu
- * @date 2020/6/8 11:31
+ * @date 2021/6/28 11:31
  * @description 动态数据源注解
  */
 @Target(ElementType.METHOD)
@@ -15,9 +16,14 @@ import java.lang.annotation.*;
 public @interface DynamicDataSource {
 
     /**
+     * 数据库类型
+     */
+    RdbmsTypeEnum rdbmsType() default RdbmsTypeEnum.MYSQL;
+
+    /**
      * 数据源类型
      */
-    DataSourceEnum dataSource() default DataSourceEnum.HIKARICP;
+    DataSourceEnum dataSource() default DataSourceEnum.DRUID;
 
     /**
      * 读写类型

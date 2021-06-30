@@ -2,8 +2,8 @@ package com.magic.liuzm.datasource.enums;
 
 /**
  * @author zemin.liu
- * @date 2020/6/8 11:31
- * @description 读写类型枚举
+ * @date 2021/6/28 11:31
+ * @description 读写库枚举
  */
 public enum WriteReadEnum {
 
@@ -15,7 +15,7 @@ public enum WriteReadEnum {
     /**
      * slave：读操作
      */
-    SLAVE1("slave1","从1库"),
+    SLAVE("slave","从1库"),
 
     /**
      * slave：读操作

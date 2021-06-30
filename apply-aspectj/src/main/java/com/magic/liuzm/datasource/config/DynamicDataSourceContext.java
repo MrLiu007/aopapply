@@ -2,7 +2,7 @@ package com.magic.liuzm.datasource.config;
 
 /**
  * @author zemin.liu
- * @date 2020/6/8 11:31
+ * @date 2021/6/28 11:31
  * @description 数据源上下文对象
  */
 public class DynamicDataSourceContext {
@@ -24,7 +24,7 @@ public class DynamicDataSourceContext {
      * 获取数据源标记
      * @return
      */
-    public static String  getDataSourceType(){
+    public static String getDataSourceType(){
         return CONTEXT_DATASOURCE.get();
     }
 

@@ -2,42 +2,40 @@ package com.magic.liuzm.datasource.enums;
 
 /**
  * @author zemin.liu
- * @date 2020/6/8 11:31
- * @description 数据源类型枚举
- *
- * 注意：这里再按mysql，oracle拆分。
+ * @date 2021/6/28 11:31
+ * @description 常见数据源类型枚举
  */
 public enum DataSourceEnum {
 
     /**
      * HikariCP(SpringBoot2.0 默认)
      */
-    HIKARICP("hikari","HikariCP(SpringBoot2.0 默认)"),
+    HIKARICP("hikari","HikariCP(SpringBoot2.0 默认)数据源"),
 
     /**
      * tomcat
      */
-    TOMCAT_JDBC_POOL("hikari","tomcat"),
+    TOMCAT_JDBC_POOL("tomcat","tomcat数据源"),
 
     /**
      * c3p0
      */
-    C3P0("hikari","c3p0"),
+    C3P0("c3p0","c3p0数据源"),
 
     /**
      * Druid
      */
-    DRUID("hikari","Druid"),
+    DRUID("druid","druid数据源"),
 
     /**
      * BoneCP
      */
-    BONECP("hikari","BoneCP"),
+    BONECP("bonecp","bonecp数据源"),
 
     /**
      * Apache Jakarta DBCP
      */
-    DBCP("hikari","Apache Jakarta DBCP");
+    DBCP("dbcp","Apache Jakarta DBCP数据源");
 
 
     private String code;
@@ -65,7 +63,7 @@ public enum DataSourceEnum {
     }
 
     public static DataSourceEnum getCacheOperateEnum(String code) {
-        for (DataSourceEnum dataSourceEnum: DataSourceEnum.values()) {
+        for (DataSourceEnum dataSourceEnum : DataSourceEnum.values()) {
             if (code.equals(dataSourceEnum.getCode())) {
                 return dataSourceEnum;
             }
@@ -74,12 +72,12 @@ public enum DataSourceEnum {
     }
 
     public static boolean checkType(String code){
-        if(DataSourceEnum.HIKARICP.code == code
-                ||DataSourceEnum.TOMCAT_JDBC_POOL.code == code
-                ||DataSourceEnum.C3P0.code == code
-                ||DataSourceEnum.DRUID.code == code
-                ||DataSourceEnum.BONECP.code == code
-                ||DataSourceEnum.DBCP.code == code){
+        if(DataSourceEnum.HIKARICP.code.equals(code)
+                || DataSourceEnum.TOMCAT_JDBC_POOL.code.equals(code)
+                || DataSourceEnum.C3P0.code.equals(code)
+                || DataSourceEnum.DRUID.code.equals(code)
+                || DataSourceEnum.BONECP.code.equals(code)
+                || DataSourceEnum.DBCP.code.equals(code)){
             return true;
         }
         return false;
